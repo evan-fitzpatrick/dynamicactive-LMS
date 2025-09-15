@@ -1,0 +1,30 @@
+<header class="site-header">
+  <div class="container header-row">
+    <a class="brand" href="{{ url_for('login') }}" aria-label="{{ brand }} home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" role="img">
+          <path d="M3 5.5A2.5 2.5 0 0 1 5.5 3H11v15H6a3 3 0 0 0-3 3V5.5Z" fill="currentColor" opacity=".9"/>
+          <path d="M21 5.5A2.5 2.5 0 0 0 18.5 3H13v15h5a3 3 0 0 1 3 3V5.5Z" fill="currentColor"/>
+        </svg>
+      </span>
+      <span class="brand-name">{{ brand }}</span>
+    </a>
+
+    <div class="header-actions">
+      {% if star_score is not none %}
+      <div class="score pill" title="Your star score" aria-label="Star score {{ star_score }}">
+        <svg class="icon star" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2l2.9 6.6 7.1.7-5.2 4.7 1.6 7-6.4-3.7-6.4 3.7 1.6-7L2 9.3l7.1-.7L12 2z"/>
+        </svg>
+        <span class="score-value">{{ star_score }}</span>
+      </div>
+      {% endif %}
+
+      {% if avatar_initials %}
+      <button class="avatar" aria-label="Open profile">
+        <span class="initials">{{ avatar_initials }}</span>
+      </button>
+      {% endif %}
+    </div>
+  </div>
+</header>

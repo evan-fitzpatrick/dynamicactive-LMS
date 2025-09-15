@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% set title = "Teacher" %}
+{% block header %}
+  {% include "partials/header.html" %}
+{% endblock %}
+{% block content %}
+<h1 class="sr-only">Teacher dashboard</h1>
+
+<div class="dashboard-grid">
+  <section class="card section-card">
+    <header class="section-header">
+      <h2 class="section-title">Students</h2>
+      <button class="btn ghost" type="button">Manage</button>
+    </header>
+
+    <ul class="data-list" role="list">
+      {% for s in students %}
+      <li class="student-row">
+        <div class="person">
+          <button class="avatar avatar--sm" aria-label="Open {{ s.name }} profile"><span class="initials">{{ s.name.split()[0][0] }}{{ s.name.split()[-1][0] }}</span></button>
+          <div class="person-meta">
+            <strong class="name">{{ s.name }}</strong>
+            <span class="meta">Grade {{ s.grade }} · Last active {{ s.last_active }}</span>
+          </div>
+        </div>
+
+        <div class="metric">
+          <span class="metric-label">Mastery</span>
+          <div class="progress" aria-label="Mastery {{ s.mastery }}%">
+            <div class="progress-bar" style="--value: {{ s.mastery }}%"></div>
+          </div>
+        </div>
+
+        <div class="status">
+          <span class="status-pill {{ s.status }}">
+            {% if s.status == 'good' %}On track{% elif s.status == 'warn' %}Watch{% else %}Needs help{% endif %}
+          </span>
+          <span class="trend {{ s.trend }}" aria-label="{% if s.trend=='up' %}Improving{% elif s.trend=='down' %}Declining{% else %}No change{% endif %}">
+            <svg viewBox="0 0 24 24" class="icon" aria-hidden="true" {% if s.trend=='down' %}style="transform: rotate(180deg);"{% endif %}>
+              <path d="M4 14l5-5 4 4 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="card section-card">
+    <header class="section-header">
+      <h2 class="section-title">Lesson Plans</h2>
+      <button class="btn ghost" type="button">Add</button>
+    </header>
+
+    <ul class="plans-list" role="list">
+      {% for p in plans %}
+      <li class="plan-row">
+        <div class="date-badge" aria-hidden="true">
+          <span class="month">{{ p.month }}</span>
+          <span class="day">{{ p.day }}</span>
+        </div>
+        <div class="plan-content">
+          <h3 class="plan-title">{{ p.title }}</h3>
+          <p class="plan-summary">{{ p.summary }}</p>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}

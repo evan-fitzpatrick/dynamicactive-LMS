@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% set title = "Student" %}
+{% block header %}
+  {% include "partials/header.html" %}
+{% endblock %}
+{% block content %}
+<section class="card summary">
+  <h2 class="summary-title">Today at a glance</h2>
+  <p class="summary-text">{{ summary }}</p>
+</section>
+
+<section class="lessons">
+  <h3 class="sr-only">Lessons sorted by stars</h3>
+  {% for lesson in lessons %}
+  <article class="lesson-card card" data-stars="{{ lesson.stars }}" tabindex="0">
+    <div class="lesson-content">
+      <h4 class="lesson-title">{{ loop.index }} · {{ lesson.title }}</h4>
+      <p class="lesson-desc">{{ lesson.description }}</p>
+    </div>
+    <div class="lesson-stars" aria-label="{{ lesson.stars }} stars">
+      <svg class="icon star" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2l2.9 6.6 7.1.7-5.2 4.7 1.6 7-6.4-3.7-6.4 3.7 1.6-7L2 9.3l7.1-.7L12 2z" />
+      </svg>
+      <strong>{{ lesson.stars }}</strong>
+    </div>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

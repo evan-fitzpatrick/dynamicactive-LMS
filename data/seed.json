@@ -1,0 +1,74 @@
+{
+  "brand": "EduSpark",
+  "student": {
+    "initials": "S",
+    "star_score": 129,
+    "summary": "Here’s a quick summary of today’s lessons: You’ll reinforce core fraction–decimal skills, practice sentence structure with interactive prompts, and explore habitats in life science. Estimated time: 35–45 minutes.",
+    "lessons": [
+      {
+        "title": "Fractions to Decimals",
+        "description": "Convert common fractions to decimals and percentages using number lines and grids.",
+        "stars": 10
+      },
+      {
+        "title": "Sentence Building",
+        "description": "Identify subjects and predicates; then rewrite run-on sentences with proper punctuation.",
+        "stars": 8
+      },
+      {
+        "title": "Habitats & Adaptations",
+        "description": "Explore how animals adapt to desert, forest, and ocean biomes through short videos.",
+        "stars": 5
+      }
+    ]
+  },
+  "teacher": {
+    "initials": "T",
+    "students": [
+      {
+        "name": "Alice Lopez",
+        "grade": "5",
+        "last_active": "2h ago",
+        "mastery": 86,
+        "status": "good",
+        "trend": "up"
+      },
+      {
+        "name": "Ben Carter",
+        "grade": "5",
+        "last_active": "1d ago",
+        "mastery": 62,
+        "status": "warn",
+        "trend": "flat"
+      },
+      {
+        "name": "Chen Park",
+        "grade": "5",
+        "last_active": "3h ago",
+        "mastery": 41,
+        "status": "bad",
+        "trend": "down"
+      }
+    ],
+    "plans": [
+      {
+        "month": "Sep",
+        "day": "16",
+        "title": "Fractions to Decimals",
+        "summary": "Convert fractions into decimals with number lines and grid models to build intuition."
+      },
+      {
+        "month": "Sep",
+        "day": "18",
+        "title": "Sentence Building",
+        "summary": "Reinforce subjects and predicates through quick writing prompts and peer review."
+      },
+      {
+        "month": "Sep",
+        "day": "20",
+        "title": "Habitats & Adaptations",
+        "summary": "Explore biome adaptations using short videos and a gallery walk activity."
+      }
+    ]
+  }
+}
