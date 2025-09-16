@@ -655,3 +655,62 @@ textarea.answer-input { min-height: 120px; resize: vertical; }
   transform: none;
   box-shadow: none;
 }
+
+/* 15) AI Help Section */
+.ai-help-section {
+  margin-top: var(--space-7);
+  margin-bottom: var(--space-6);
+  padding: var(--space-5);
+  border: 1px solid var(--divider);
+  border-radius: var(--r-m);
+  background: transparent;
+}
+
+.ai-help-section h3 {
+  font-size: var(--fs-18);
+  margin-top: 0;
+  margin-bottom: var(--space-2);
+}
+
+.ai-help-form {
+  margin-top: var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+}
+
+#student-question-input {
+  width: 100%;
+  min-height: 60px;
+  max-width: none; /* Override default max-width for inputs */
+}
+
+#ask-ai-btn {
+  justify-self: start; /* Align button to the left */
+}
+
+#ai-response-area {
+  margin-top: var(--space-4);
+}
+
+.hint-display {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: color-mix(in srgb, var(--brand) 4%, var(--surface));
+  border-radius: var(--r-s);
+  border-left: 3px solid var(--brand);
+  color: var(--muted);
+  font-style: italic;
+  font-size: var(--fs-14);
+  line-height: 1.6;
+}
+
+/* Hide the hint box if it's empty */
+.hint-display:empty {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .hint-display {
+    background-color: color-mix(in srgb, var(--brand) 15%, var(--surface));
+  }
+}
