@@ -1,0 +1,13 @@
+{
+  "title": "Sentence Building",
+  "markdown_content": "### Sentence Building\r\n\r\n**Instructions:** Identify the subjects and predicates in each sentence, then rewrite the run-on sentences with proper punctuation.\r\n\r\n**1. Identify the Subject and Predicate:**\r\n<br>\r\n<input type=\"text\" name=\"q1_subject\" class=\"answer-input\" placeholder=\"Subject\">\r\n<input type=\"text\" name=\"q1_predicate\" class=\"answer-input\" placeholder=\"Predicate\">\r\n\r\nThe hungry dog ate the entire bowl of food.\r\n\r\n**2. Identify the Subject and Predicate:**\r\n<br>\r\n<input type=\"text\" name=\"q2_subject\" class=\"answer-input\" placeholder=\"Subject\">\r\n<input type=\"text\" name=\"q2_predicate\" class=\"answer-input\" placeholder=\"Predicate\">\r\n\r\nThe children played in the park until it started to rain.\r\n\r\n**3. Rewrite the Run-on Sentence:**\r\n<br>\r\n<textarea rows=\"4\" cols=\"50\" name=\"q3_rewrite\" class=\"answer-input\"></textarea>\r\n\r\nThe cat chased the mouse it ran under the sofa because it was scared.\r\n\r\n**4. Rewrite the Run-on Sentence:**\r\n<br>\r\n<textarea rows=\"4\" cols=\"50\" name=\"q4_rewrite\" class=\"answer-input\"></textarea>\r\n\r\nThe teacher gave a lecture the students were very attentive.\r\n\r\n**5. Rewrite the Run-on Sentence:**\r\n<br>\r\n<textarea rows=\"4\" cols=\"50\" name=\"q5_rewrite\" class=\"answer-input\"></textarea>\r\n\r\nThe baby cried all night long the parents were exhausted.",
+  "answer_key": {
+    "q1_subject": "The hungry dog",
+    "q1_predicate": "ate the entire bowl of food",
+    "q2_subject": "The children",
+    "q2_predicate": "played in the park until it started to rain",
+    "q3_rewrite": "The cat chased the mouse. It ran under the sofa because it was scared.",
+    "q4_rewrite": "The teacher gave a lecture. The students were very attentive.",
+    "q5_rewrite": "The baby cried all night long. The parents were exhausted."
+  }
+}

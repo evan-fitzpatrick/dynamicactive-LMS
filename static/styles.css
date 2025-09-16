@@ -153,7 +153,7 @@ h1, h2, h3, h4 { margin: 0 0 var(--space-3); line-height: 1.2; letter-spacing: -
 .avatar:hover{ box-shadow: var(--elev-2); transform: translateY(-1px); }
 
 /* Consolidated focus */
-.avatar:focus-visible, .pill:focus-visible, .lesson-card:focus-visible, .role-card:focus-visible, .btn:focus-visible {
+.avatar:focus-visible, .pill:focus-visible, .lesson-card:focus-visible, .role-card:focus-visible, .btn:focus-visible, .plan-row:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
@@ -162,8 +162,8 @@ h1, h2, h3, h4 { margin: 0 0 var(--space-3); line-height: 1.2; letter-spacing: -
 .page{ padding: var(--space-7) 0 var(--space-8); }
 
 /* Eyebrow label on section headings */
-.summary-title{ 
-  font-size: var(--fs-18); 
+.summary-title{
+  font-size: var(--fs-18);
   margin-bottom: var(--space-2);
   letter-spacing: .02em;
 }
@@ -266,7 +266,8 @@ h1, h2, h3, h4 { margin: 0 0 var(--space-3); line-height: 1.2; letter-spacing: -
 .dashboard-grid{
   display: grid;
   grid-template-columns: 1.1fr .9fr;
-  gap: var(--space-6);
+  gap: var(--space-7);
+  margin-top: var(--space-7);
 }
 .section-card{ padding: var(--space-6); }
 .section-header{
@@ -330,16 +331,20 @@ h1, h2, h3, h4 { margin: 0 0 var(--space-3); line-height: 1.2; letter-spacing: -
 .trend.down{ color: #ef4444; }
 
 /* Lesson plans */
-.plans-list{ list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.plans-list{ list-style: none; margin: 0; padding: 0; }
 .plan-row{
-  display: grid; grid-template-columns: auto 1fr; gap: var(--space-4);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-4);
   align-items: center;
-  padding: var(--space-4) 0;
+  padding: var(--space-4);
   background: transparent;
-  border: 0; border-radius: 0;
+  border: 0;
+  border-radius: var(--r-m);
+  color: inherit;
   transition: background .14s ease;
 }
-.plans-list > .plan-row + .plan-row{ border-top: 1px solid var(--divider); }
+.plans-list > li + li{ margin-top: var(--space-2); }
 .plan-row:hover{ background: color-mix(in srgb, var(--brand) 4%, var(--surface)); }
 
 .date-badge{
@@ -475,4 +480,237 @@ h1, h2, h3, h4 { margin: 0 0 var(--space-3); line-height: 1.2; letter-spacing: -
 /* 11) Reduced motion */
 @media (prefers-reduced-motion: reduce){
   * { transition: none !important; }
+}
+
+/* 12) Lesson Page */
+.lesson-content-card { padding: var(--space-7); }
+.lesson-page-title { font-size: var(--fs-32); margin-bottom: var(--space-6); }
+.lesson-form h3 { font-size: var(--fs-24); margin-top: var(--space-7); margin-bottom: var(--space-4); }
+.lesson-form h3:first-of-type { margin-top: 0; }
+.lesson-form p, .lesson-form li { color: var(--muted); margin-bottom: var(--space-4); }
+.lesson-form strong { color: var(--text); }
+.lesson-form ul { padding-left: var(--space-5); }
+
+.answer-input {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  padding: var(--space-3);
+  margin-top: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-s);
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--fs-16);
+  transition: border-color .16s ease, box-shadow .16s ease;
+  line-height: 1.5;
+}
+textarea.answer-input { min-height: 120px; resize: vertical; }
+
+.answer-input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--focus);
+  outline: none;
+}
+.answer-input.correct {
+  border-color: #16a34a; /* Green 600 */
+  background-color: color-mix(in srgb, #16a34a 5%, var(--surface));
+}
+
+.feedback {
+  display: block;
+  font-weight: 600;
+  font-size: var(--fs-14);
+  margin: var(--space-2) 0 var(--space-4);
+}
+.feedback.correct { color: #16a34a; }
+.feedback.incorrect { color: #ef4444; } /* Red 500 */
+
+.submit-btn {
+  margin-top: var(--space-6);
+  padding: 12px 20px;
+  background-color: var(--brand);
+  color: #fff;
+  border: 0;
+  box-shadow: var(--elev-1);
+}
+.submit-btn:hover {
+  background-color: color-mix(in srgb, var(--brand) 85%, #000);
+  box-shadow: var(--elev-2);
+}
+.submit-btn:disabled {
+  background-color: var(--muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .answer-input.correct {
+    border-color: #4ade80; /* Green 400 */
+    background-color: color-mix(in srgb, #4ade80 12%, var(--surface));
+  }
+  .feedback.correct { color: #4ade80; }
+  .feedback.incorrect { color: #f87171; } /* Red 400 */
+}
+
+/* 13) Teacher Lesson Edit Page */
+.lesson-edit-card { padding: var(--space-7); }
+
+.lesson-edit-form .form-group {
+  margin-bottom: var(--space-6);
+}
+
+.lesson-edit-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+}
+
+.edit-textarea {
+  display: block;
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-s);
+  background: var(--surface);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: var(--fs-14);
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+
+.edit-textarea:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--focus);
+  outline: none;
+}
+
+#markdown-preview-area {
+  padding: var(--space-5);
+  border: 1px solid var(--divider);
+  border-radius: var(--r-s);
+  min-height: 300px;
+}
+
+.form-actions {
+  margin-top: var(--space-7);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  border-top: 1px solid var(--divider);
+  padding-top: var(--space-5);
+}
+
+.form-actions-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Fix for submit button margin inside this specific form */
+.form-actions .submit-btn {
+  margin-top: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .edit-textarea {
+    background-color: var(--bg);
+  }
+}
+
+/* 14) AI Generation Tools */
+.ai-tools-group {
+  margin: var(--space-7) 0;
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--divider);
+}
+.ai-tools-group label {
+  font-size: var(--fs-18);
+  font-weight: 700;
+  display: block;
+  margin-bottom: var(--space-4);
+}
+.ai-tools-group .edit-textarea {
+  min-height: 80px;
+}
+.ai-tools-actions {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: flex-start;
+}
+.ai-tools-actions .btn {
+  background-color: var(--brand);
+  color: #fff;
+}
+.ai-tools-actions .btn:hover {
+  background-color: color-mix(in srgb, var(--brand) 85%, #000);
+}
+.ai-tools-actions .btn:disabled {
+  background-color: var(--muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 15) AI Help Section */
+.ai-help-section {
+  margin-top: var(--space-7);
+  margin-bottom: var(--space-6);
+  padding: var(--space-5);
+  border: 1px solid var(--divider);
+  border-radius: var(--r-m);
+  background: transparent;
+}
+
+.ai-help-section h3 {
+  font-size: var(--fs-18);
+  margin-top: 0;
+  margin-bottom: var(--space-2);
+}
+
+.ai-help-form {
+  margin-top: var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+}
+
+#student-question-input {
+  width: 100%;
+  min-height: 60px;
+  max-width: none; /* Override default max-width for inputs */
+}
+
+#ask-ai-btn {
+  justify-self: start; /* Align button to the left */
+}
+
+#ai-response-area {
+  margin-top: var(--space-4);
+}
+
+.hint-display {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: color-mix(in srgb, var(--brand) 4%, var(--surface));
+  border-radius: var(--r-s);
+  border-left: 3px solid var(--brand);
+  color: var(--muted);
+  font-style: italic;
+  font-size: var(--fs-14);
+  line-height: 1.6;
+}
+
+/* Hide the hint box if it's empty */
+.hint-display:empty {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .hint-display {
+    background-color: color-mix(in srgb, var(--brand) 15%, var(--surface));
+  }
 }

@@ -1,0 +1,19 @@
+{
+  "title": "Part 1: Converting Fractions to Decimals",
+  "markdown_content": "### Part 1: Converting Fractions to Decimals\n\nA fraction represents a part of a whole. The top number (numerator) tells us how many parts we have, and the bottom number (denominator) tells us the total number of parts in the whole. To convert a fraction to a decimal, we divide the numerator by the denominator.\n\nFor example, to convert **1/2** to a decimal, we divide 1 by 2.\n\n- **Question 1:** What is 1 divided by 2?\n\n  <input type=\"text\" name=\"q1\" class=\"answer-input\" placeholder=\"e.g. 0.5\" />\n\n### Part 2: Practice\n\nNow, let's try another one.\n\n- **Question 2:** Convert the fraction **3/4** to a decimal.\n\n  <input type=\"text\" name=\"q2\" class=\"answer-input\" placeholder=\"e.g. 0.75\" />\n\n### Part 3: Conceptual Check\n\n- **Question 3:** In your own words, what does the denominator of a fraction represent?\n\n  <textarea name=\"q3\" class=\"answer-input\" placeholder=\"Type your answer here...\"></textarea>",
+  "answer_key": {
+    "q1": {
+      "type": "exact-match",
+      "answer": "0.5"
+    },
+    "q2": {
+      "type": "exact-match",
+      "answer": "0.75"
+    },
+    "q3": {
+      "type": "llm-check",
+      "question_text": "In your own words, what does the denominator of a fraction represent?",
+      "expected_answer": "The total number of equal parts the whole is divided into."
+    }
+  }
+}

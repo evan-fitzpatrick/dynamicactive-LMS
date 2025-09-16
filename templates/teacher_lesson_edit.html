@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% set title = "Edit: " ~ lesson_title %}
+
+{% block header %}
+  {% include "partials/header.html" %}
+{% endblock %}
+
+{% block content %}
+<section class="card lesson-edit-card">
+  <h1 class="lesson-page-title">Edit: {{ lesson_title }}</h1>
+  
+  <form id="lesson-edit-form" class="lesson-edit-form" method="POST" action="{{ url_for('save_lesson', lesson_slug=lesson_slug) }}">
+    
+    <div id="edit-mode-container" style="display: none;">
+      <div class="form-group">
+        <label for="markdown_content">Lesson Content (Markdown)</label>
+        <textarea id="markdown_content" name="markdown_content" class="edit-textarea" rows="20">{{ raw_markdown }}</textarea>
+      </div>
+  
+      <div class="form-group">
+        <label for="answer_key_json">Answer Key (JSON)</label>
+        <textarea id="answer_key_json" name="answer_key_json" class="edit-textarea" rows="10">{{ raw_json }}</textarea>
+      </div>
+
+      <div class="ai-tools-group">
+        <label for="ai-prompt">AI Assistant</label>
+        <textarea id="ai-prompt" class="edit-textarea" rows="3" placeholder="e.g., Make the questions easier and add a third question about improper fractions."></textarea>
+        <div class="ai-tools-actions">
+          <button type="button" id="ai-generate-btn" class="btn">Generate with AI</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="preview-mode-container">
+      <div class="form-group">
+        <label>Lesson Preview</label>
+        <div id="markdown-preview-area" class="lesson-form">
+          <p>Loading preview...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" id="toggle-view-btn" class="btn ghost">Edit</button>
+      
+      <div class="form-actions-main" style="display: none;">
+        <a href="{{ url_for('teacher') }}" class="btn ghost">Cancel</a>
+        <button type="submit" class="btn submit-btn">Save Changes</button>
+      </div>
+    </div>
+
+  </form>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // --- Element References ---
+  const toggleBtn = document.getElementById('toggle-view-btn');
+  const editContainer = document.getElementById('edit-mode-container');
+  const previewContainer = document.getElementById('preview-mode-container');
+  const previewArea = document.getElementById('markdown-preview-area');
+  const markdownTextarea = document.getElementById('markdown_content');
+  const mainFormActions = document.querySelector('.form-actions-main');
+  
+  let isEditing = false;
+
+  // --- Function to fetch and render preview ---
+  async function updatePreview() {
+    const formData = new FormData();
+    formData.append('markdown_text', markdownTextarea.value);
+
+    try {
+      const response = await fetch("{{ url_for('preview_lesson') }}", {
+        method: 'POST',
+        body: formData,
+      });
+      const html = await response.text();
+      previewArea.innerHTML = html;
+    } catch (error) {
+      previewArea.innerHTML = '<p>Error loading preview.</p>';
+      console.error('Preview failed:', error);
+    }
+  }
+
+  // --- Initial State: Load the preview immediately ---
+  updatePreview();
+
+  // --- Event Listener for the toggle button ---
+  toggleBtn.addEventListener('click', async () => {
+    isEditing = !isEditing;
+
+    if (isEditing) {
+      // --- Switch to Edit Mode ---
+      toggleBtn.textContent = 'Preview';
+      toggleBtn.classList.remove('ghost');
+      
+      previewContainer.style.display = 'none';
+      editContainer.style.display = 'block';
+      mainFormActions.style.display = 'flex';
+
+    } else {
+      // --- Switch to Preview Mode ---
+      // First, update the preview with any changes made in the editor
+      await updatePreview(); 
+      
+      toggleBtn.textContent = 'Edit';
+      toggleBtn.classList.add('ghost');
+      
+      previewContainer.style.display = 'block';
+      editContainer.style.display = 'none';
+      mainFormActions.style.display = 'none';
+    }
+  });
+
+  // --- AI GENERATION SCRIPT (no changes needed here) ---
+  const aiGenerateBtn = document.getElementById('ai-generate-btn');
+  const aiPromptTextarea = document.getElementById('ai-prompt');
+  const answerKeyTextarea = document.getElementById('answer_key_json');
+
+  aiGenerateBtn.addEventListener('click', async () => {
+    const prompt = aiPromptTextarea.value.trim();
+    if (!prompt) {
+      alert('Please enter a prompt for the AI assistant.');
+      return;
+    }
+
+    // Set loading state
+    aiGenerateBtn.disabled = true;
+    aiGenerateBtn.textContent = 'Generating...';
+
+    const formData = new FormData();
+    formData.append('prompt', prompt);
+    formData.append('markdown_content', markdownTextarea.value);
+    formData.append('answer_key_json', answerKeyTextarea.value);
+
+    try {
+      const response = await fetch("{{ url_for('generate_with_ai') }}", {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || `HTTP error! Status: ${response.status}`);
+      }
+
+      // Update textareas with the AI-generated content
+      if (result.markdown_content && result.answer_key_json) {
+        markdownTextarea.value = result.markdown_content;
+        answerKeyTextarea.value = result.answer_key_json;
+      } else {
+         throw new Error("Received an invalid response from the server.");
+      }
+
+    } catch (error) {
+      console.error('AI generation failed:', error);
+      alert(`An error occurred: ${error.message}`);
+    } finally {
+      // Reset button state
+      aiGenerateBtn.disabled = false;
+      aiGenerateBtn.textContent = 'Generate with AI';
+    }
+  });
+});
+</script>
+{% endblock %}
