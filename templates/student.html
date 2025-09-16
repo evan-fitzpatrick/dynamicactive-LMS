@@ -6,13 +6,13 @@
 {% block content %}
 <section class="card summary">
   <h2 class="summary-title">Today at a glance</h2>
-  <p class="summary-text">{{ summary }}</p>
+  <p class="summary-text" id="summary-text">{{ summary }}</p>
 </section>
 
 <section class="lessons">
   <h3 class="sr-only">Lessons sorted by stars</h3>
   {% for lesson in lessons %}
-  <article class="lesson-card card" data-stars="{{ lesson.stars }}" tabindex="0">
+  <a class="lesson-card card" href="{{ url_for('lesson', lesson_slug=lesson.slug) }}" data-stars="{{ lesson.stars }}">
     <div class="lesson-content">
       <h4 class="lesson-title">{{ loop.index }} · {{ lesson.title }}</h4>
       <p class="lesson-desc">{{ lesson.description }}</p>
@@ -23,7 +23,34 @@
       </svg>
       <strong>{{ lesson.stars }}</strong>
     </div>
-  </article>
+  </a>
   {% endfor %}
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const summaryEl = document.getElementById('summary-text');
+  const fallbackSummary = "Here are your lessons for today!";
+
+  // Fetch the AI-generated summary
+  fetch("{{ url_for('generate_student_summary') }}")
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data && data.summary) {
+        summaryEl.textContent = data.summary;
+      } else {
+        summaryEl.textContent = fallbackSummary;
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching AI summary:', error);
+      summaryEl.textContent = fallbackSummary; // Show fallback on error
+    });
+});
+</script>
 {% endblock %}
