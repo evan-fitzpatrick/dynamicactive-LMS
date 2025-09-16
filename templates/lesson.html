@@ -10,6 +10,17 @@
   <h1 class="lesson-page-title">{{ lesson_title }}</h1>
   <form id="lesson-form" class="lesson-form" data-url="{{ url_for('submit_lesson', lesson_slug=request.view_args.lesson_slug) }}">
     {{ lesson_content|safe }}
+
+    <div class="ai-help-section">
+      <h3>Need Help?</h3>
+      <p class="summary-text">Ask a question about this lesson and get a guiding response from our AI assistant.</p>
+      <div class="ai-help-form">
+        <textarea id="student-question-input" name="student_question" class="answer-input" placeholder="For example: What is a denominator?"></textarea>
+        <button type="button" id="ask-ai-btn" class="btn">Ask A Question</button>
+      </div>
+      <div id="ai-response-area" class="hint-display"></div>
+    </div>
+
     <button type="submit" class="btn submit-btn">Check Answers</button>
   </form>
 </section>
@@ -19,17 +30,67 @@
     const form = document.getElementById('lesson-form');
     if (!form) return;
 
+    // --- NEW: AI Help Section Logic ---
+    const askButton = document.getElementById('ask-ai-btn');
+    const questionInput = document.getElementById('student-question-input');
+    const responseArea = document.getElementById('ai-response-area');
+    // Get the text of the entire lesson form to use as context for the AI
+    const lessonContentForAI = form.innerText;
+
+    if (askButton && questionInput && responseArea) {
+      askButton.addEventListener('click', async () => {
+        const studentQuestion = questionInput.value.trim();
+        if (!studentQuestion) {
+          responseArea.textContent = 'Please type a question first.';
+          return;
+        }
+
+        // Set UI to loading state
+        askButton.disabled = true;
+        askButton.textContent = 'Thinking...';
+        responseArea.innerHTML = ''; // Clear previous response
+
+        try {
+          const formData = new FormData();
+          formData.append('student_question', studentQuestion);
+          formData.append('context', lessonContentForAI);
+
+          const response = await fetch("{{ url_for('ask_ai_for_help') }}", {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Network response was not ok');
+          }
+
+          const data = await response.json();
+          responseArea.textContent = data.response; // Display the AI's answer
+
+        } catch (error) {
+          console.error("Failed to get AI help:", error);
+          responseArea.textContent = "Sorry, I couldn't get an answer right now. Please try again.";
+        } finally {
+          // Restore the button to its original state
+          askButton.disabled = false;
+          askButton.textContent = 'Ask A Question';
+        }
+      });
+    }
+
+
+    // --- Existing form submission logic ---
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
+      // Use new FormData(form) to capture all fields, including the new student_question textarea
       const formData = new FormData(form);
       const url = form.dataset.url;
       const submitButton = form.querySelector('.submit-btn');
       
-      // Disable button and show loading state
       submitButton.disabled = true;
       submitButton.textContent = 'Checking...';
       
-      // Clear previous feedback
       document.querySelectorAll('.feedback').forEach(el => el.remove());
       document.querySelectorAll('.answer-input.correct, .answer-input.incorrect').forEach(el => {
         el.classList.remove('correct', 'incorrect');
@@ -47,16 +108,14 @@
 
         const result = await response.json();
         
-        // Display feedback from the server
         if (result.feedback) {
           for (const [questionId, status] of Object.entries(result.feedback)) {
             const inputEl = form.querySelector(`[name="${questionId}"]`);
             if (inputEl) {
-              inputEl.classList.add(status); // 'correct' or 'incorrect'
+              inputEl.classList.add(status);
               const feedbackEl = document.createElement('span');
               feedbackEl.className = `feedback ${status}`;
               feedbackEl.textContent = status === 'correct' ? '✅ Correct!' : '❌ Incorrect';
-              // Insert feedback after the input field
               inputEl.parentNode.insertBefore(feedbackEl, inputEl.nextSibling);
             }
           }
@@ -65,7 +124,6 @@
         console.error("Submission failed:", error);
         alert("There was an issue checking your answers. Please try again.");
       } finally {
-        // Re-enable the button
         submitButton.disabled = false;
         submitButton.textContent = 'Check Answers';
       }
