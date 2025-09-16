@@ -9,6 +9,9 @@ from flask import Flask, render_template, url_for, request, jsonify, abort, redi
 
 app = Flask(__name__)
 
+# --- Centralized AI Model ---
+AI_MODEL = "mistralai/mistral-7b-instruct:free"
+
 # --- Corrected File Paths ---
 DATA_PATH = Path(__file__).parent / "data"
 LESSONS_PATH = DATA_PATH / "lessons"  # This now correctly points to the directory
@@ -85,7 +88,7 @@ def generate_ai_summary(system_prompt, user_prompt, fallback_summary="Here is yo
                 "Content-Type": "application/json"
             },
             data=json.dumps({
-                "model": "openai/gpt-3.5-turbo",
+                "model": AI_MODEL,
                 "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
@@ -147,7 +150,7 @@ def grade_with_llm(question, student_answer, expected_answer):
             url="https://openrouter.ai/api/v1/chat/completions",
             headers={"Authorization": f"Bearer {api_key}"},
             data=json.dumps({
-                "model": "mistralai/mistral-7b-instruct:free",
+                "model": AI_MODEL,
                 "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": full_prompt}
@@ -161,7 +164,6 @@ def grade_with_llm(question, student_answer, expected_answer):
         ai_response = response.json()
         result = ai_response['choices'][0]['message']['content'].strip().lower()
         print(f"LLM Grader response: {result}")
-        # BUG FIX: Change from `in` to `==` to prevent "incorrect" being marked as "correct"
         return result == "correct"
     except Exception as e:
         print(f"An error occurred during LLM grading: {e}", file=sys.stderr)
@@ -244,6 +246,7 @@ def submit_lesson(lesson_slug):
 
     feedback = {}
     for question_id, user_answer in answers.items():
+        if question_id == 'student_question': continue # Ignore the AI help question
         rule = answer_key.get(question_id)
         if not rule:
             feedback[question_id] = "no-rule"
@@ -261,7 +264,6 @@ def submit_lesson(lesson_slug):
             expected_answer = rule.get("expected_answer", "")
             is_correct = grade_with_llm(question_text, user_answer, expected_answer)
         
-        # --- Keep old methods for backward compatibility ---
         elif "numeric" in rule:
             try:
                 user_num = float(user_answer)
@@ -391,7 +393,6 @@ def preview_lesson():
     html = markdown2.markdown(content_without_title)
     return html
 
-# --- NEW AI FEATURE ROUTE ---
 @app.route("/teacher/lesson/generate-with-ai", methods=["POST"])
 def generate_with_ai():
     """Generates lesson content using an AI model from Openrouter."""
@@ -403,7 +404,6 @@ def generate_with_ai():
         except:
             return jsonify({"error": "OPENROUTER_API_KEY environment variable not set."}), 500
         
-    # Get data from the frontend
     user_prompt = request.form.get('prompt')
     markdown_content = request.form.get('markdown_content')
     answer_key_json = request.form.get('answer_key_json')
@@ -411,34 +411,10 @@ def generate_with_ai():
     if not user_prompt:
         return jsonify({"error": "Prompt is missing."}), 400
 
-    # System prompt to guide the AI
     system_prompt = """
-    You are an expert educational content assistant. Your task is to create or modify a lesson plan based on the user's request.
-    The lesson plan is provided as 'markdown_content' and an 'answer_key_json' string.
-    You MUST return a single, valid JSON object with two keys: "markdown_content" and "answer_key_json".
-
-    ### Answer Key Rules:
-    For the `answer_key_json`, use one of two grading types:
-
-    1.  **`exact-match`**: Use for questions with a single, precise, short answer (e.g., a number, a specific term).
-        -   The `name` in the markdown MUST match the key in the answer key.
-        -   Example: `"q1": {"type": "exact-match", "answer": "0.5"}`
-
-    2.  **`llm-check`**: Use for open-ended questions that require conceptual understanding.
-        -   The `name` in the markdown MUST match the key in the answer key.
-        -   You MUST include the full `question_text`.
-        -   You MUST provide a concise `expected_answer` for the AI grader to compare against.
-        -   Example: `"q2": {"type": "llm-check", "question_text": "In your own words, what does a denominator represent?", "expected_answer": "The total number of equal parts a whole is divided into."}`
-
-    ### Markdown Rules:
-    -   The value of "markdown_content" should be the updated markdown string.
-    -   Answer inputs in the markdown MUST have `class="answer-input"` and a `name` attribute (e.g., `name="q1"`).
-    -   Ensure the `name` attributes in the markdown's input/textarea tags correspond perfectly to the keys in the answer key.
-
-    Do not include any explanatory text outside of the final JSON object.
+    You are an expert educational content assistant. Your task is to create or modify a lesson plan based on the user's request...
     """
     
-    # User prompt that includes the teacher's request and the current lesson data
     full_prompt = f"""
     User Request: "{user_prompt}"
 
@@ -458,32 +434,17 @@ def generate_with_ai():
     try:
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            },
+            headers={ "Authorization": f"Bearer {api_key}", "Content-Type": "application/json" },
             data=json.dumps({
-                "model": "mistralai/mistral-7b-instruct:free", # Using a free model for this example
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": full_prompt}
-                ]
+                "model": AI_MODEL, 
+                "messages": [ { "role": "system", "content": system_prompt }, { "role": "user", "content": full_prompt } ]
             })
         )
-        response.raise_for_status() # Raise an exception for bad status codes
-        
+        response.raise_for_status()
         ai_response = response.json()
         content = ai_response['choices'][0]['message']['content']
-        
-        # Clean the response to find the JSON object
         json_match = re.search(r'```json\s*(\{.*?\})\s*```', content, re.DOTALL)
-        if json_match:
-            json_string = json_match.group(1)
-        else:
-            # Fallback for when the AI doesn't use markdown code blocks
-            json_string = content[content.find('{'):content.rfind('}')+1]
-
-        # Validate and parse the final JSON string
+        json_string = json_match.group(1) if json_match else content[content.find('{'):content.rfind('}')+1]
         parsed_json = json.loads(json_string)
         return jsonify(parsed_json)
 
@@ -491,6 +452,73 @@ def generate_with_ai():
         return jsonify({"error": f"API request failed: {e}"}), 500
     except (json.JSONDecodeError, KeyError, IndexError):
         return jsonify({"error": "Failed to parse AI response. The response may be invalid."}), 500
+    except Exception as e:
+        return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
+
+# --- UPDATED: AI Help Route for Students ---
+@app.route("/lesson/ask-ai-for-help", methods=["POST"])
+def ask_ai_for_help():
+    """Answers a student's question about the lesson content using an AI tutor model."""
+    api_key = os.environ.get("OPENROUTER_API_KEY")
+    if not api_key:
+        try:
+            with open('openrouter_key.txt', 'r') as keyfile:
+                api_key = keyfile.read().strip()
+        except FileNotFoundError:
+            return jsonify({"error": "AI feature is not configured."}), 500
+
+    student_question = request.form.get('student_question')
+    context = request.form.get('context') # The full lesson content
+
+    if not student_question or not context:
+        return jsonify({"error": "Missing question or context."}), 400
+
+    system_prompt = """
+    You are a friendly and encouraging AI teaching assistant named Gemini. Your role is to help a student by answering their specific question about the lesson material provided.
+    
+    GUIDELINES:
+    1.  **Do Not Give Direct Answers:** Never solve the lesson's main problems or questions directly. Your goal is to foster understanding, not provide shortcuts.
+    2.  **Guide, Don't Tell:** Instead of giving the answer, guide the student with explanations, analogies, or leading questions. For example, if asked "How do I solve 3/4?", you could say, "Great question! Remember that a fraction is like a division problem. What happens when you divide the top number by the bottom number?"
+    3.  **Use the Context:** Base your answer on the provided lesson context.
+    4.  **Keep it Concise:** Provide a clear and brief response (2-3 sentences).
+    5.  **Be Encouraging:** Maintain a positive and supportive tone.
+    """
+
+    full_prompt = f"""
+    Here is the full lesson content for context:
+    ---
+    {context}
+    ---
+
+    A student has asked the following question about this lesson: "{student_question}"
+
+    Please provide a helpful, guiding response based on your instructions.
+    """
+
+    try:
+        response = requests.post(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            headers={ "Authorization": f"Bearer {api_key}", "Content-Type": "application/json" },
+            data=json.dumps({
+                "model": AI_MODEL,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": full_prompt}
+                ],
+                "max_tokens": 120,
+                "temperature": 0.5,
+            }),
+            timeout=20
+        )
+        response.raise_for_status()
+        ai_response = response.json()
+        ai_answer = ai_response['choices'][0]['message']['content'].strip()
+        return jsonify({"response": ai_answer})
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": f"API request failed: {e}"}), 500
+    except (KeyError, IndexError):
+        return jsonify({"error": "Failed to parse AI response."}), 500
     except Exception as e:
         return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
 
