@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% set title = lesson_title %}
+
+{% block header %}
+  {% include "partials/header.html" %}
+{% endblock %}
+
+{% block content %}
+<section class="card lesson-content-card">
+  <h1 class="lesson-page-title">{{ lesson_title }}</h1>
+  <form id="lesson-form" class="lesson-form" data-url="{{ url_for('submit_lesson', lesson_slug=request.view_args.lesson_slug) }}">
+    {{ lesson_content|safe }}
+    <button type="submit" class="btn submit-btn">Check Answers</button>
+  </form>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('lesson-form');
+    if (!form) return;
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const formData = new FormData(form);
+      const url = form.dataset.url;
+      const submitButton = form.querySelector('.submit-btn');
+      
+      // Disable button and show loading state
+      submitButton.disabled = true;
+      submitButton.textContent = 'Checking...';
+      
+      // Clear previous feedback
+      document.querySelectorAll('.feedback').forEach(el => el.remove());
+      document.querySelectorAll('.answer-input.correct, .answer-input.incorrect').forEach(el => {
+        el.classList.remove('correct', 'incorrect');
+      });
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        // Display feedback from the server
+        if (result.feedback) {
+          for (const [questionId, status] of Object.entries(result.feedback)) {
+            const inputEl = form.querySelector(`[name="${questionId}"]`);
+            if (inputEl) {
+              inputEl.classList.add(status); // 'correct' or 'incorrect'
+              const feedbackEl = document.createElement('span');
+              feedbackEl.className = `feedback ${status}`;
+              feedbackEl.textContent = status === 'correct' ? '✅ Correct!' : '❌ Incorrect';
+              // Insert feedback after the input field
+              inputEl.parentNode.insertBefore(feedbackEl, inputEl.nextSibling);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Submission failed:", error);
+        alert("There was an issue checking your answers. Please try again.");
+      } finally {
+        // Re-enable the button
+        submitButton.disabled = false;
+        submitButton.textContent = 'Check Answers';
+      }
+    });
+  });
+</script>
+{% endblock %}
